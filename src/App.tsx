@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import type { JSX } from "react";
-import LoginPage from "./pages/LoginPage";
+import SignInPage from "./pages/SignInPage";
 import { useAuth } from "./commons/AuthContext";
 import NotFoundPage from "./pages/NotFoundPage";
-import RegisterPage from "./pages/RegisterPage";
+import SignUpPage from "./pages/SignUpPage";
 import DashboardPage from "./pages/DashboardPage";
 
 const PublicRoute = ({ children }: { children: JSX.Element }) => {
@@ -13,14 +13,14 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => {
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { token } = useAuth();
-  return token ? children : <Navigate to="/login" replace />;
+  return token ? children : <Navigate to="/signin" replace />;
 };
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+      <Route path="/signup" element={<PublicRoute><SignUpPage /></PublicRoute>} />
+      <Route path="/signin" element={<PublicRoute><SignInPage /></PublicRoute>} />
       <Route path="/" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

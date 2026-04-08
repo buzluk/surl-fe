@@ -1,10 +1,10 @@
 import api from './api'
-import type { IShortUrl } from '../types/shorturl';
+import type { IShortUrl, IShortUrlResponse } from '../types/shorturl';
 import type { IApiResponse } from '../types/common';
 
 export const shortUrlService = {
-    getAll: async (): Promise<IApiResponse<IShortUrl[]>> => {
-        const response = await api.get<IApiResponse<IShortUrl[]>>('/short-url');
+    getAll: async (): Promise<IShortUrlResponse> => {
+        const response = await api.get<IShortUrlResponse>('/short-url');
         return response.data;
     },
 

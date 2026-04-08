@@ -1,11 +1,10 @@
-export interface ILoginData {
+export interface ISignInRequest {
     username: string;
     password: string;
 }
 
-export interface IRegisterData {
+export interface ISignUpRequest {
     username: string;
     email: string;
     password: string;
 }
-

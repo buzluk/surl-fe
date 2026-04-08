@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { postLogin } from "../services/authService";
-import type { ILoginData } from "../types/auth";
+import { postLogin } from "../services/userService";
+import type { ISignInRequest } from "../types/account";
 type User = { username: string };
 type AuthState = {
   user: User | null;
@@ -8,7 +8,7 @@ type AuthState = {
 };
 
 type AuthContextType = AuthState & {
-  login: (loginData: ILoginData) => Promise<void>;
+  login: (loginData: ISignInRequest) => Promise<void>;
   logout: () => void;
 };
 
@@ -27,10 +27,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = async ({ username, password }: ILoginData) => {
-    const res = await postLogin({ username, password });
-    if (!res.success) throw new Error("Login failed");
-    const token = res.data ? res.data : "null";
+  const login = async ({ username, password }: ISignInRequest) => {
+    const token = await postLogin({ username, password });
+    if (!token) throw new Error("Login failed");
     localStorage.setItem("token", token);
     localStorage.setItem("username", username);
     setToken(token);

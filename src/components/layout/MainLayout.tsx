@@ -3,38 +3,52 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../commons/AuthContext';
 
 interface MainLayoutProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-    return (
-        <div className="main-layout">
-            <header className="navbar">
-                <div className="navbar-container">
-                    <Link to="/" className="navbar-brand">Short URL</Link>
+  const initials = user?.username
+    ? user.username.slice(0, 2).toUpperCase()
+    : '??';
 
-                    <nav className="navbar-menu">
-                        <span className="user-welcome">Hello, {user?.username}</span>
-                        <button onClick={handleLogout} className="btn-secondary btn-sm">
-                            Logout
-                        </button>
-                    </nav>
-                </div>
-            </header>
+  return (
+    <div className="main-layout">
+      <header className="navbar">
+        <div className="navbar-container">
+          <Link to="/" className="navbar-brand">
+            <div className="brand-icon">⚡</div>
+            <span className="brand-text">Surl</span>
+          </Link>
 
-            <main className="main-content">
-                {children}
-            </main>
+          <div className="navbar-right">
+            <div className="user-badge">
+              <div className="user-avatar">{initials}</div>
+              <span className="user-name">{user?.username}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="btn btn-secondary btn-sm"
+              title="Logout"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
-    );
+      </header>
+
+      <main className="main-content">
+        {children}
+      </main>
+    </div>
+  );
 };
 
 export default MainLayout;

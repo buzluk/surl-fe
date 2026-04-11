@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import { useForm } from '../hooks/useForm';
 import { shortUrlService } from '../services/shortUrlService';
 import { type IShortUrl } from '../types/shorturl';
-import ShortUrlTable from '../components/ShortUrlTable';
+import ShortUrlTable, { type SortKey, type SortDir } from '../components/ShortUrlTable';
 import ConfirmModal from '../components/ConfirmModal';
 import ToastContainer from '../components/ToastContainer';
 import { useToast } from '../hooks/useToast';
+
+const PAGE_SIZE = 10;
 
 /* ── Skeleton rows ──────────────────────────────────── */
 function SkeletonRows() {
@@ -52,23 +54,51 @@ const DashboardPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  /* ── Pagination state ── */
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
+  /* ── Sort state ── */
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
   const { formData, handleChange, resetForm } = useForm({ originalUrl: '' });
   const { toasts, toast, dismiss } = useToast();
 
-  useEffect(() => {
-    fetchShortUrls();
+  const buildSortParam = useCallback((key: SortKey | null, dir: SortDir): string | undefined => {
+    return key ? `${key},${dir}` : undefined;
   }, []);
 
-  const fetchShortUrls = async () => {
+  const fetchShortUrls = useCallback(async (page = 0, sKey = sortKey, sDir = sortDir) => {
+    setLoading(true);
     try {
-    
-      const result = await shortUrlService.getAll();
+      const result = await shortUrlService.getAll(page, PAGE_SIZE, buildSortParam(sKey, sDir));
       setShortUrls(result.content ?? []);
+      setCurrentPage(result.currentPage);
+      setTotalPages(result.totalPages);
+      setTotalElements(result.totalElements);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Failed to load your links.', 'error');
     } finally {
       setLoading(false);
     }
+  }, [sortKey, sortDir, buildSortParam]);
+
+  useEffect(() => {
+    fetchShortUrls(0);
+  }, [fetchShortUrls]);
+
+  const handlePageChange = (page: number) => {
+    if (page < 0 || page >= totalPages || page === currentPage) return;
+    fetchShortUrls(page);
+  };
+
+  const handleSort = (key: SortKey) => {
+    const newDir: SortDir = sortKey === key && sortDir === 'asc' ? 'desc' : 'asc';
+    setSortKey(key);
+    setSortDir(newDir);
+    fetchShortUrls(0, key, newDir);
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -76,12 +106,10 @@ const DashboardPage: React.FC = () => {
     if (!formData.originalUrl) return;
     setCreating(true);
     try {
-      const result = await shortUrlService.create(formData.originalUrl);
-      if (result.data) {
-        setShortUrls((prev) => [result.data!, ...prev]);
-      }
+      await shortUrlService.create(formData.originalUrl);
       resetForm();
       toast('Short link created successfully!', 'success');
+      fetchShortUrls(0);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Could not create the link. Please try again.', 'error');
     } finally {
@@ -94,8 +122,8 @@ const DashboardPage: React.FC = () => {
     setDeleting(true);
     try {
       await shortUrlService.delete(deleteTarget);
-      setShortUrls((prev) => prev.filter((l) => l.id !== deleteTarget));
       toast('Link deleted.', 'success');
+      fetchShortUrls(currentPage);
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Delete failed. Please try again.', 'error');
     } finally {
@@ -121,7 +149,7 @@ const DashboardPage: React.FC = () => {
           <div className="stat-card">
             <div className="stat-icon stat-icon-primary">🔗</div>
             <div>
-              <div className="stat-value">{shortUrls.length}</div>
+              <div className="stat-value">{totalElements}</div>
               <div className="stat-label">Total Links</div>
             </div>
           </div>
@@ -182,7 +210,7 @@ const DashboardPage: React.FC = () => {
           <div className="section-header">
             <h3 className="section-title">
               My Links
-              <span className="count-badge">{shortUrls.length}</span>
+              <span className="count-badge">{totalElements}</span>
             </h3>
 
             {shortUrls.length > 0 && (
@@ -225,7 +253,45 @@ const DashboardPage: React.FC = () => {
               <ShortUrlTable
                 data={filtered}
                 onDelete={(id) => setDeleteTarget(id)}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onSort={handleSort}
               />
+
+              {/* ── Pagination ── */}
+              {totalPages > 1 && (
+                <div className="pagination" id="pagination">
+                  <button
+                    className="pagination-btn"
+                    disabled={currentPage === 0}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    aria-label="Previous page"
+                  >
+                    ‹ Prev
+                  </button>
+
+                  <div className="pagination-pages">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button
+                        key={i}
+                        className={`pagination-btn ${i === currentPage ? 'pagination-btn-active' : ''}`}
+                        onClick={() => handlePageChange(i)}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    className="pagination-btn"
+                    disabled={currentPage === totalPages - 1}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    aria-label="Next page"
+                  >
+                    Next ›
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </section>

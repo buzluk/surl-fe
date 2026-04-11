@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import type { IShortUrl } from '../types/shorturl';
 
+export type SortKey = 'fullShortUrl' | 'originalUrl' | 'createdAt';
+export type SortDir = 'asc' | 'desc';
+
 interface ShortUrlTableProps {
   data: IShortUrl[];
   onDelete: (id: number) => void;
+  sortKey: SortKey | null;
+  sortDir: SortDir;
+  onSort: (key: SortKey) => void;
 }
 
 function formatDate(iso: string) {
@@ -46,15 +52,26 @@ function CopyButton({ url }: { url: string }) {
   );
 }
 
-export default function ShortUrlTable({ data, onDelete }: ShortUrlTableProps) {
+function SortIndicator({ column, sortKey, sortDir }: { column: SortKey; sortKey: SortKey | null; sortDir: SortDir }) {
+  if (sortKey !== column) return <span className="sort-indicator">⇅</span>;
+  return <span className="sort-indicator sort-indicator-active">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+}
+
+export default function ShortUrlTable({ data, onDelete, sortKey, sortDir, onSort }: ShortUrlTableProps) {
   return (
     <div className="table-responsive">
       <table className="custom-table">
         <thead>
           <tr>
-            <th>Short Link</th>
-            <th>Original URL</th>
-            <th>Created</th>
+            <th className="th-sortable" onClick={() => onSort('fullShortUrl')}>
+              Short Link <SortIndicator column="fullShortUrl" sortKey={sortKey} sortDir={sortDir} />
+            </th>
+            <th className="th-sortable" onClick={() => onSort('originalUrl')}>
+              Original URL <SortIndicator column="originalUrl" sortKey={sortKey} sortDir={sortDir} />
+            </th>
+            <th className="th-sortable" onClick={() => onSort('createdAt')}>
+              Created <SortIndicator column="createdAt" sortKey={sortKey} sortDir={sortDir} />
+            </th>
             <th style={{ textAlign: 'right' }}>Actions</th>
           </tr>
         </thead>

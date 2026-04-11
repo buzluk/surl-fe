@@ -1,6 +1,5 @@
 import api from './api'
 import type { IShortUrl, IMinimalPage } from '../types/shorturl';
-import type { IApiResponse } from '../types/common';
 
 export const shortUrlService = {
     getAll: async (page = 0, size = 10, sort?: string): Promise<IMinimalPage<IShortUrl>> => {
@@ -10,13 +9,13 @@ export const shortUrlService = {
         return response.data;
     },
 
-    create: async (url: string): Promise<IApiResponse<IShortUrl>> => {
-        const response = await api.post<IApiResponse<IShortUrl>>('/short-url?url=' + url);
+    create: async (url: string): Promise<IShortUrl> => {
+        const response = await api.post<IShortUrl>('/short-url?url=' + url);
         return response.data;
     },
 
-    delete: async (id: number): Promise<IApiResponse<void>> => {
+    delete: async (id: number): Promise<void> => {
         const response = await api.delete(`/short-url/${id}`);
         return response.data;
     }
-};
+};

@@ -3,7 +3,7 @@ import MainLayout from '../components/layout/MainLayout';
 import { useForm } from '../hooks/useForm';
 import { shortUrlService } from '../services/shortUrlService';
 import { type IShortUrl } from '../types/shorturl';
-import ShortUrlTable, { type SortKey, type SortDir } from '../components/ShortUrlTable';
+import { ShortUrlTable, type SortKey, type SortDir } from '../components/table';
 import ConfirmModal from '../components/ConfirmModal';
 import ToastContainer from '../components/ToastContainer';
 import { useToast } from '../hooks/useToast';

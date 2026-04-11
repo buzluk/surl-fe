@@ -64,8 +64,8 @@ const DashboardPage: React.FC = () => {
     
       const result = await shortUrlService.getAll();
       setShortUrls(result.content ?? []);
-    } catch {
-      toast('Failed to load your links.', 'error');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Failed to load your links.', 'error');
     } finally {
       setLoading(false);
     }
@@ -82,8 +82,8 @@ const DashboardPage: React.FC = () => {
       }
       resetForm();
       toast('Short link created successfully!', 'success');
-    } catch {
-      toast('Could not create the link. Please try again.', 'error');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Could not create the link. Please try again.', 'error');
     } finally {
       setCreating(false);
     }
@@ -96,8 +96,8 @@ const DashboardPage: React.FC = () => {
       await shortUrlService.delete(deleteTarget);
       setShortUrls((prev) => prev.filter((l) => l.id !== deleteTarget));
       toast('Link deleted.', 'success');
-    } catch {
-      toast('Delete failed. Please try again.', 'error');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Delete failed. Please try again.', 'error');
     } finally {
       setDeleting(false);
       setDeleteTarget(null);

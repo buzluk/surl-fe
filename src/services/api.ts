@@ -25,6 +25,13 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (axios.isAxiosError(error)) {
+            const status = error.response?.status;
+            if (status === 401 || status === 403) {
+                localStorage.removeItem('token');
+                window.location.href = '/signin';
+                return Promise.reject(error);
+            }
+
             const serverMessage = error.response?.data?.message;
             if (serverMessage) {
                 return Promise.reject(new Error(serverMessage));

@@ -83,7 +83,7 @@ const DashboardPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [sortKey, sortDir, buildSortParam]);
+  }, [sortKey, sortDir, buildSortParam, toast]);
 
   useEffect(() => {
     fetchShortUrls(0);

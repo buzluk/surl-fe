@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import type { JSX } from "react";
 import SignInPage from "./pages/SignInPage";
-import { useAuth } from "./commons/AuthContext";
+import { useAuth } from "./contexts/AuthContext";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUpPage from "./pages/SignUpPage";
 import DashboardPage from "./pages/DashboardPage";
